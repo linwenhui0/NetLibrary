@@ -83,7 +83,7 @@ public class NormalAsynHttp<T> extends BaseAsynHttp<T> {
     protected T parse(Respond respond) {
         IParse parse = HttpParamConfig.getInstance().getParseFormat();
         if (parse.isValidRespond(respond)) {
-            Logger.i(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
+            Logger.getInstance().i(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
             final String objJSON = HttpParamConfig.getInstance().getParseFormat().getObjectString(respond);
             return JSON.parseObject(objJSON, clz);
         } else {

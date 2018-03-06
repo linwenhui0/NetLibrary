@@ -16,10 +16,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    flavorDimensions "net"
+    productFlavors {
+        localFlavor {
+            dimension "net"
+        }
+        githubFlavor {
+            dimension "net"
+        }
+    }
 }
 
 dependencies {
-    compile 'com.github.linwenhui0:UtilLibary:0.0.2'
+    githubFlavorCompileOnly 'com.github.linwenhui0:UtilLibary:0.0.6'
+    localFlavorCompileOnly 'com.hlibrary.util:utillibrary:0.0.17-SNAPSHOT'
 }
 
 def getRepositoryUsername() {

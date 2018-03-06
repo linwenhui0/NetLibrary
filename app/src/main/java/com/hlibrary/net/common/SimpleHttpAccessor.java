@@ -97,7 +97,7 @@ public class SimpleHttpAccessor extends BaseHttpAccessor implements
 		try {
 			StringBuilder urlBuilder = new StringBuilder(urlStr);
 			urlBuilder.append("?").append(param.encodeUrl());
-			Logger.i(TAG,urlBuilder.toString());
+			Logger.getInstance().i(TAG,urlBuilder.toString());
 			URL url = new URL(urlBuilder.toString());
 			HttpURLConnection urlConnection = (HttpURLConnection) url
 					.openConnection();

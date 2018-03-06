@@ -108,7 +108,7 @@ public class Requests {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Logger.i(TAG, sb.toString());
+        Logger.getInstance().i(TAG, sb.toString());
         return sb.toString();
 
     }

@@ -25,7 +25,7 @@ public class StringAsynHttp extends NormalAsynHttp<String> {
     protected String parse(Respond respond) {
         IParse parse = HttpParamConfig.getInstance().getParseFormat();
         if (parse.isValidRespond(respond)) {
-            Logger.i(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
+            Logger.getInstance().i(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
             return HttpParamConfig.getInstance().getParseFormat().getObjectString(respond);
         }
         return null;

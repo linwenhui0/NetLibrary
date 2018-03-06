@@ -28,7 +28,7 @@ public class NormalsAsynHttp<T> extends NormalAsynHttp<T> {
     protected List<T> parseArray(Respond respond) {
         IParse parse = HttpParamConfig.getInstance().getParseFormat();
         if (parse.isValidRespond(respond)) {
-            Logger.i(" === parseArray === code = " + respond.getCode() + " = data = " + respond.getData());
+            Logger.getInstance().i(" === parseArray === code = " + respond.getCode() + " = data = " + respond.getData());
             final String parseArr = parse.getArrayString(respond);
             return JSON.parseArray(parseArr, clz);
         }else {

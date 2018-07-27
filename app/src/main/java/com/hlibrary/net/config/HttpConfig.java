@@ -2,9 +2,8 @@ package com.hlibrary.net.config;
 
 import android.content.Context;
 
-import com.hlibrary.net.listener.IHttpAccessor;
+import com.hlibrary.net.model.HttpMethod;
 import com.hlibrary.net.model.Request;
-import com.hlibrary.net.model.Requests;
 import com.hlibrary.net.model.Respond;
 
 
@@ -16,17 +15,20 @@ public class HttpConfig {
 
     private Context mCtx;
     // 请求方式
-    private IHttpAccessor.HttpMethod httpMethod;
+    private HttpMethod httpMethod;
     // 请求参数
-    private Requests params;
+    private Request params;
     // 请求失败错误信息
     private String defaultErrorNotice;
+
+    private boolean needValidHttps;
+    private boolean saveCookie;
 
     /**
      * 构造函数
      */
     public HttpConfig(Context context) {
-        this(context, IHttpAccessor.HttpMethod.Get);
+        this(context, HttpMethod.GET);
     }
 
     /**
@@ -34,11 +36,10 @@ public class HttpConfig {
      *
      * @param httpMethod 请求方式
      */
-    public HttpConfig(Context context, IHttpAccessor.HttpMethod httpMethod) {
+    public HttpConfig(Context context, HttpMethod httpMethod) {
         this.mCtx = context;
         this.httpMethod = httpMethod;
-        this.params = new Requests();
-        defaultErrorNotice = Respond.TimeOut;
+        defaultErrorNotice = Respond.TIME_OUT;
     }
 
     public Context getContext() {
@@ -46,27 +47,24 @@ public class HttpConfig {
     }
 
 
-    public IHttpAccessor.HttpMethod getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
-    public void setHttpMethod(IHttpAccessor.HttpMethod httpMethod) {
+    public void setHttpMethod(HttpMethod httpMethod) {
         this.httpMethod = httpMethod;
     }
 
-    public Requests getParams() {
+
+    public HttpConfig putParam(String key, String value) {
+        if (params == null)
+            params = new Request();
+        params.put(key, value);
+        return this;
+    }
+
+    public Request getParams() {
         return params;
-    }
-
-    public HttpConfig putParam(Request request) {
-        params.put(request);
-        return this;
-    }
-
-
-    public HttpConfig setRequests(Requests requests) {
-        this.params = requests;
-        return this;
     }
 
     public String getErrorNotice() {
@@ -77,4 +75,21 @@ public class HttpConfig {
         this.defaultErrorNotice = defaultErrorNotice;
     }
 
+    public boolean isNeedValidHttps() {
+        return needValidHttps;
+    }
+
+    public HttpConfig setNeedValidHttps(boolean needValidHttps) {
+        this.needValidHttps = needValidHttps;
+        return this;
+    }
+
+    public boolean isSaveCookie() {
+        return saveCookie;
+    }
+
+    public HttpConfig setSaveCookie(boolean saveCookie) {
+        this.saveCookie = saveCookie;
+        return this;
+    }
 }

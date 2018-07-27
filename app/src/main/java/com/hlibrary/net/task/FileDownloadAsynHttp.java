@@ -2,33 +2,32 @@ package com.hlibrary.net.task;
 
 import android.os.AsyncTask;
 
-import com.hlibrary.net.common.file.FileDownloadAccessor;
+import com.hlibrary.net.callback.IFileDownloadCallback;
+import com.hlibrary.net.http.common.file.FileDownloadAccessor;
 import com.hlibrary.net.config.HttpConfig;
-import com.hlibrary.net.config.HttpParamConfig;
-import com.hlibrary.net.listener.FileDownloadListener;
-import com.hlibrary.net.listener.IResult;
 
 /**
  * 文件下载(以HttpURLConnection方式实现)
  */
 public class FileDownloadAsynHttp extends AsyncTask<String, Integer, Boolean> {
 
+    private final static int DOWNLOAD_CONNECT_TIMEOUT = 15 * 1000;
+    private final static int DOWNLOAD_READ_TIMEOUT = 60 * 1000;
+
     protected HttpConfig httpConfig;
 
     protected FileDownloadAccessor accessor;
-    private FileDownloadListener downloadListener;
-    protected IResult<Boolean> result;
+    protected IFileDownloadCallback<Boolean> callback;
 
     /**
      * 构造函数
      *
-     * @param httpConfig       网络请求参数
-     * @param downloadListener 文件下载监听
+     * @param httpConfig 网络请求参数
+     * @param callback   文件下载监听
      */
-    public FileDownloadAsynHttp(HttpConfig httpConfig,
-                                FileDownloadListener downloadListener) {
+    public FileDownloadAsynHttp(HttpConfig httpConfig, IFileDownloadCallback<Boolean> callback) {
         this.httpConfig = httpConfig;
-        this.downloadListener = downloadListener;
+        this.callback = callback;
         this.accessor = new FileDownloadAccessor(httpConfig.getContext());
     }
 
@@ -41,8 +40,7 @@ public class FileDownloadAsynHttp extends AsyncTask<String, Integer, Boolean> {
      */
     protected Boolean doGetSaveFile(String url, String savePath) {
         return accessor.doGetSaveFile(url, savePath,
-                HttpParamConfig.getInstance().getDownloadConnectTimeout(),
-                HttpParamConfig.getInstance().getDownloadReadTimeout(), downloadListener);
+                DOWNLOAD_CONNECT_TIMEOUT, DOWNLOAD_READ_TIMEOUT, callback);
     }
 
     @Override
@@ -55,25 +53,17 @@ public class FileDownloadAsynHttp extends AsyncTask<String, Integer, Boolean> {
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-        if (getResult() == null)
+        if (callback == null)
             return;
         if (result)
-            getResult().onSuccee(true);
+            callback.onSuccee(true);
         else
-            getResult().onError(httpConfig.getErrorNotice());
+            callback.onError(httpConfig.getErrorNotice());
     }
 
-    public IResult<Boolean> getResult() {
-        return result;
-    }
 
-    /**
-     * 回调接口设置
-     *
-     * @param result
-     */
-    public void setResult(IResult<Boolean> result) {
-        this.result = result;
+    public void setCallback(IFileDownloadCallback<Boolean> callback) {
+        this.callback = callback;
     }
 
     @Override

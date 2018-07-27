@@ -2,21 +2,17 @@ package com.hlibrary.net.task;
 
 import android.os.AsyncTask;
 
-import com.alibaba.fastjson.JSON;
-import com.hlibrary.net.common.SimpleHttpAccessor;
+import com.hlibrary.net.callback.IResultErrorCallback;
+import com.hlibrary.net.http.common.SimpleHttpAccessor;
 import com.hlibrary.net.config.HttpConfig;
-import com.hlibrary.net.config.HttpParamConfig;
 import com.hlibrary.net.listener.IHttpAccessor;
-import com.hlibrary.net.listener.parse.IParse;
-import com.hlibrary.net.model.Respond;
-import com.hlibrary.util.Logger;
 
 
-public class NormalAsynHttp<T> extends BaseAsynHttp<T> {
+public class NormalAsynHttp<T, D extends IResultErrorCallback> extends BaseAsynHttp<D> {
 
-    protected IHttpAccessor accessor;
-    private NetTask netTask;
-    protected Class<T> clz;
+
+    protected Task<T, D> netTask = null;
+    private Class<T> clz;
 
     /**
      * 构造函数
@@ -34,8 +30,7 @@ public class NormalAsynHttp<T> extends BaseAsynHttp<T> {
      * @param accessor   网络请求的实现类
      */
     public NormalAsynHttp(HttpConfig httpConfig, IHttpAccessor accessor, Class<T> clz) {
-        super(httpConfig);
-        this.accessor = accessor;
+        super(httpConfig, accessor);
         this.clz = clz;
     }
 
@@ -45,18 +40,21 @@ public class NormalAsynHttp<T> extends BaseAsynHttp<T> {
      * @return
      */
     public boolean isFinish() {
-        if (netTask != null && netTask.getStatus() == AsyncTask.Status.FINISHED)
+        if (netTask != null && netTask.getStatus() == AsyncTask.Status.FINISHED) {
             return true;
+        }
         return false;
     }
 
     /**
      * 取消网线操作
      */
-    public void onCancelled() {
+    public void cancel() {
         if (netTask != null)
             netTask.cancel(true);
+        netTask = null;
     }
+
 
     /**
      * 发起请求
@@ -64,66 +62,17 @@ public class NormalAsynHttp<T> extends BaseAsynHttp<T> {
      * @param url
      */
     public AsyncTask doPost(String url) {
-        if (netTask == null)
-            netTask = new NetTask();
-        if (netTask != null && netTask.getStatus() == AsyncTask.Status.FINISHED) {
-            netTask = new NetTask();
+        if (netTask == null) {
+            netTask = new Task<>(accessor, clz, httpConfig, callback, parseCallback);
             netTask.executeOnExecutor(threadPool, url);
+        } else {
+            if (netTask.getStatus() == AsyncTask.Status.FINISHED) {
+                netTask = new Task<>(accessor, clz, httpConfig, callback, parseCallback);
+                netTask.executeOnExecutor(threadPool, url);
+            }
         }
-        netTask.executeOnExecutor(threadPool, url);
         return netTask;
     }
 
-    /**
-     * 返回解析
-     *
-     * @param respond
-     * @return
-     */
-    protected T parse(Respond respond) {
-        IParse parse = HttpParamConfig.getInstance().getParseFormat();
-        if (parse.isValidRespond(respond)) {
-            Logger.getInstance().i(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
-            final String objJSON = HttpParamConfig.getInstance().getParseFormat().getObjectString(respond);
-            return JSON.parseObject(objJSON, clz);
-        } else {
-            httpConfig.setErrorNotice(parse.errorNotice(respond));
-        }
-        return null;
-    }
-
-    private class NetTask extends AsyncTask<String, Integer, T> {
-        @Override
-        protected T doInBackground(String... params) {
-            Respond respond = accessor.executeNormalTask(
-                    httpConfig.getHttpMethod(), params[0], httpConfig.getParams(),
-                    HttpParamConfig.getInstance().getConnectTimeout(), HttpParamConfig.getInstance().getReadTimeout(),
-                    false, false);
-            return parse(respond);
-        }
-
-        @Override
-        protected void onPostExecute(T result) {
-            if (getResult() == null)
-                return;
-            if (result != null) {
-                getResult().onSuccee(result);
-            } else {
-                getResult().onError(httpConfig.getErrorNotice());
-            }
-        }
-
-        @Override
-        protected void onCancelled(T t) {
-            super.onCancelled(t);
-            accessor.abort();
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            accessor.abort();
-        }
-    }
 
 }

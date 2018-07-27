@@ -7,20 +7,21 @@ package com.hlibrary.net.model;
  */
 public class Respond {
 
-	public final static String UrlError = "url 解析出错";
-	public final static String NoRespond = "服务器未响应";
-	public final static String TimeOut = "连接超时";
-	public final static String NetError = "网络节点又出故障，换个网络试试";
+	public final static String URL_ERROR = "url 解析出错";
+	public final static String NO_RESPOND = "服务器未响应";
+	public final static String TIME_OUT = "连接超时";
+	public final static String NET_ERROR = "网络节点又出故障，换个网络试试";
 
 	// 失败
-	public final static int False = -1;
+	public final static int FALSE = -1;
 	// 成功
-	public final static int Succee = 0;
+	public final static int SUCCEE = 0;
 
 	// 网络请求返回状态
 	private int code;
 	// 返回数据
 	private String data;
+	private String errorData;
 
 	/**
 	 * @param code
@@ -69,4 +70,11 @@ public class Respond {
 		this.data = data;
 	}
 
+	public String getErrorData() {
+		return errorData;
+	}
+
+	public void setErrorData(String errorData) {
+		this.errorData = errorData;
+	}
 }

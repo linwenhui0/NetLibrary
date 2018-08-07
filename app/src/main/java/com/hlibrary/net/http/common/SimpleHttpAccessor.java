@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static com.hlibrary.net.task.BaseAsynHttp.debug;
+
 public class SimpleHttpAccessor extends BaseHttpAccessor {
 
     private final static String TAG = "SimpleHttpAccessor";
@@ -31,8 +33,8 @@ public class SimpleHttpAccessor extends BaseHttpAccessor {
                                      Request param, int connectTimeOut, int readTimeOut,
                                      boolean isSaveCookie) {
         if (httpMethod == HttpMethod.GET)
-            return doGet(url, param, connectTimeOut, readTimeOut, isSaveCookie);
-        return doPost(url, param, connectTimeOut, readTimeOut, isSaveCookie);
+            return doGet(url, param, connectTimeOut * 1000, readTimeOut * 1000, isSaveCookie);
+        return doPost(url, param, connectTimeOut * 1000, readTimeOut * 1000, isSaveCookie);
     }
 
 
@@ -82,7 +84,8 @@ public class SimpleHttpAccessor extends BaseHttpAccessor {
             StringBuilder urlBuilder = new StringBuilder(urlStr);
             if (param != null)
                 urlBuilder.append("?").append(param.encodeUrl());
-            Logger.getInstance().i(TAG, urlBuilder.toString());
+            if (debug)
+                Logger.getInstance().i(TAG, urlBuilder.toString());
             URL url = new URL(urlBuilder.toString());
             HttpURLConnection urlConnection = (HttpURLConnection) url
                     .openConnection();

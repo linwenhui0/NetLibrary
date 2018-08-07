@@ -20,7 +20,7 @@ allprojects {
         jcenter()
         maven { url 'https://jitpack.io' }
         maven { url 'https://maven.google.com' }
-        maven { url 'http://45.76.184.66:8081/nexus/content/repositories/UtilLibary-Snapshot'}
+        maven { url 'http://45.76.184.66:8081/nexus/content/repositories/HLibrary-Snapshots'}
     }
 }
 

@@ -16,14 +16,16 @@ import com.hlibrary.util.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hlibrary.net.task.BaseAsynHttp.debug;
+
 /**
  * Created by linwenhui on 2018/3/19.
  */
 
 class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer, List<T>> {
 
-    private final static int CONNECT_TIMEOUT = 10000;
-    private final static int READ_TIMEOUT = 10000;
+    private final static int CONNECT_TIMEOUT = 10;
+    private final static int READ_TIMEOUT = 10;
     private IHttpAccessor accessor;
     private Class<T> clz;
     private HttpConfig httpConfig;
@@ -101,6 +103,7 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
      */
     List<T> parse(Respond respond) {
         if (parseCallback.isValidRespond(respond)) {
+            if (debug)
             Logger.getInstance().defaultTagI(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
             final String objJSON = parseCallback.getObjectString(respond);
             if (clz.getName().equals(String.class.getName())) {

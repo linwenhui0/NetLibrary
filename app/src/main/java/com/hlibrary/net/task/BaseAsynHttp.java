@@ -27,6 +27,7 @@ public abstract class BaseAsynHttp<T extends IResultErrorCallback> {
     protected HttpConfig httpConfig;
     protected T callback;
     protected IParseCallback parseCallback;
+    public static boolean debug = false;
 
     protected static ExecutorService threadPool = Executors.newFixedThreadPool(30);
 

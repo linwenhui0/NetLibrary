@@ -62,7 +62,8 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
 
     private Respond doGet(String url, Request params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
         StringBuilder urlBuilder = new StringBuilder(url);
-        urlBuilder.append("?").append(params.encodeUrl());
+        if (params != null)
+            urlBuilder.append("?").append(params.encodeUrl());
         Respond respond;
         OkHttpClient client = buildClient(connectTimeOut, readTimeOut, isSaveCookie);
 

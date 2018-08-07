@@ -3,8 +3,8 @@ package com.hlibrary.net.task;
 import android.os.AsyncTask;
 
 import com.hlibrary.net.callback.IResultErrorCallback;
-import com.hlibrary.net.http.common.SimpleHttpAccessor;
 import com.hlibrary.net.config.HttpConfig;
+import com.hlibrary.net.http.common.SimpleHttpAccessor;
 import com.hlibrary.net.listener.IHttpAccessor;
 
 
@@ -32,6 +32,13 @@ public class NormalAsynHttp<T, D extends IResultErrorCallback> extends BaseAsynH
     public NormalAsynHttp(HttpConfig httpConfig, IHttpAccessor accessor, Class<T> clz) {
         super(httpConfig, accessor);
         this.clz = clz;
+    }
+
+    @Override
+    public void setCallback(D callback) {
+        super.setCallback(callback);
+        if (netTask != null)
+            netTask.setCallback(callback);
     }
 
     /**

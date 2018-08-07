@@ -4,6 +4,7 @@ import android.content.Context
 import android.text.TextUtils
 import com.hlibrary.net.callback.IParseCallback
 import com.hlibrary.net.model.Respond
+import com.hlibrary.net.task.BaseAsynHttp.debug
 import com.hlibrary.util.Logger
 import org.json.JSONException
 import org.json.JSONObject
@@ -93,7 +94,8 @@ class CommonParse : IParseCallback {
 
 
     override fun isValidRespond(respond: Respond?): Boolean {
-        Logger.getInstance().defaultTagD(respond)
+        if (debug)
+            Logger.getInstance().defaultTagD(respond)
         if (respond?.code == Respond.SUCCEE) {
             try {
                 var dataObj = JSONObject(respond.getData())
@@ -170,7 +172,8 @@ class CommonParse : IParseCallback {
 
         try {
             var dataObj = JSONObject(respond?.getData())
-            Logger.getInstance().defaultTagD(dataObj?.toString())
+            if (debug)
+                Logger.getInstance().defaultTagD(dataObj?.toString())
             var objJson: JSONObject? = null
             keyData?.split("|")?.forEach {
                 if (objJson == null) {
@@ -184,7 +187,7 @@ class CommonParse : IParseCallback {
                     objJson = tempObj
                 }
             }
-            if (objJson!= null)
+            if (objJson != null)
                 return objJson.toString()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -213,7 +216,7 @@ class CommonParse : IParseCallback {
                     objJson = tempObj
                 }
             }
-            if (objJson!=null)
+            if (objJson != null)
                 return objJson.toString()
         } catch (e: Exception) {
             e.printStackTrace()

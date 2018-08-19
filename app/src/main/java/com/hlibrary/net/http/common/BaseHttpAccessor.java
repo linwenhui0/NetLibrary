@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.hlibrary.net.listener.IHttpAccessor;
 import com.hlibrary.net.model.Respond;
+import com.hlibrary.net.util.Constants;
 import com.hlibrary.net.util.CookieManage;
 
 import org.json.JSONException;
@@ -18,7 +19,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.zip.GZIPInputStream;
 
-
+/**
+ * @param <T>
+ * @author linwenhui
+ */
 public abstract class BaseHttpAccessor<T extends HttpURLConnection> implements IHttpAccessor {
 
     Context mCtx;
@@ -46,7 +50,7 @@ public abstract class BaseHttpAccessor<T extends HttpURLConnection> implements I
         } catch (IOException e) {
             e.printStackTrace();
             httpURLConnection.disconnect();
-            return new Respond(Respond.FALSE, Respond.TIME_OUT);
+            return new Respond(Respond.FALSE, Respond.NET_ERROR, e);
         }
 
         if (status != HttpURLConnection.HTTP_OK) {
@@ -83,10 +87,9 @@ public abstract class BaseHttpAccessor<T extends HttpURLConnection> implements I
         try {
             is = urlConnection.getInputStream();
 
-            String content_encode = urlConnection.getContentEncoding();
+            String contentEncode = urlConnection.getContentEncoding();
 
-            if (null != content_encode && !"".equals(content_encode)
-                    && content_encode.equals("gzip")) {
+            if (!TextUtils.isEmpty(contentEncode) && contentEncode.equals(Constants.GZIP)) {
                 is = new GZIPInputStream(is);
             }
 
@@ -124,10 +127,9 @@ public abstract class BaseHttpAccessor<T extends HttpURLConnection> implements I
                 errorStr = Respond.NET_ERROR;
             }
 
-            String content_encode = urlConnection.getContentEncoding();
+            String contentEncode = urlConnection.getContentEncoding();
 
-            if (null != content_encode && !"".equals(content_encode)
-                    && content_encode.equals("gzip")) {
+            if (!TextUtils.isEmpty(contentEncode) && contentEncode.equals(Constants.GZIP)) {
                 is = new GZIPInputStream(is);
             }
 
@@ -148,6 +150,7 @@ public abstract class BaseHttpAccessor<T extends HttpURLConnection> implements I
         return errorStr;
     }
 
+    @Override
     public void abort() {
         if (urlConnection != null) {
             urlConnection.disconnect();

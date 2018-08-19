@@ -8,15 +8,17 @@ import com.hlibrary.net.callback.IMulResultCallback;
 import com.hlibrary.net.callback.IParseCallback;
 import com.hlibrary.net.callback.IResultCallback;
 import com.hlibrary.net.callback.IResultErrorCallback;
-import com.hlibrary.net.config.HttpConfig;
 import com.hlibrary.net.listener.IHttpAccessor;
 import com.hlibrary.net.model.Respond;
+import com.hlibrary.net.util.Constants;
 import com.hlibrary.util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static com.hlibrary.net.task.BaseAsynHttp.debug;
+import static com.hlibrary.net.util.Constants.debug;
+
 
 /**
  * Created by linwenhui on 2018/3/19.
@@ -26,22 +28,24 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
 
     private final static int CONNECT_TIMEOUT = 10;
     private final static int READ_TIMEOUT = 10;
+    private int method;
+    private Map<String, String> params;
     private IHttpAccessor accessor;
     private Class<T> clz;
-    private HttpConfig httpConfig;
     private D callback;
     private IParseCallback parseCallback;
+    private boolean saveCookie;
+    private Respond respond;
 
-    public Task(IHttpAccessor accessor, Class<T> clz, HttpConfig httpConfig, IParseCallback parseCallback) {
-        this(accessor, clz, httpConfig, null, parseCallback);
-    }
 
-    public Task(IHttpAccessor accessor, Class<T> clz, HttpConfig httpConfig, D callback, IParseCallback parseCallback) {
+    public Task(IHttpAccessor accessor, int method, Map<String, String> params, boolean saveCookie, Class<T> clz, D callback, IParseCallback parseCallback) {
         this.accessor = accessor;
         this.clz = clz;
-        this.httpConfig = httpConfig;
+        this.method = method;
+        this.params = params;
         this.callback = callback;
         this.parseCallback = parseCallback;
+        this.saveCookie = saveCookie;
     }
 
     public Task<T, D> setCallback(D callback) {
@@ -51,17 +55,18 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
 
     @Override
     protected final List<T> doInBackground(String... params) {
-        Respond respond = accessor.executeNormalTask(
-                httpConfig.getHttpMethod(), params[0], httpConfig.getParams(),
+        respond = accessor.executeRequest(
+                method, params[0], this.params,
                 CONNECT_TIMEOUT, READ_TIMEOUT,
-                httpConfig.isSaveCookie());
+                saveCookie);
         return parse(respond);
     }
 
     @Override
     protected final void onPostExecute(List<T> results) {
-        if (callback == null)
+        if (callback == null) {
             return;
+        }
         if (results != null) {
             if (results.isEmpty()) {
                 callback.onEmpty();
@@ -78,7 +83,9 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
                 }
             }
         } else {
-            callback.onError(httpConfig.getErrorNotice());
+            if (respond != null) {
+                callback.onError(respond.getErrorData());
+            }
         }
     }
 
@@ -103,19 +110,20 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
      */
     List<T> parse(Respond respond) {
         if (parseCallback.isValidRespond(respond)) {
-            if (debug)
-            Logger.getInstance().defaultTagI(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
+            if (debug) {
+                Logger.getInstance().defaultTagI(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
+            }
             final String objJSON = parseCallback.getObjectString(respond);
             if (clz.getName().equals(String.class.getName())) {
                 List<T> objList = new ArrayList<>();
                 objList.add((T) objJSON);
                 return objList;
             } else {
-                if (objJSON.startsWith("{")) {
+                if (objJSON.startsWith(Constants.RESULT_START_JSON_OBJECT_FLAG)) {
                     List<T> objList = new ArrayList<>();
                     objList.add(JSON.parseObject(objJSON, clz));
                     return objList;
-                } else if (objJSON.startsWith("[")) {
+                } else if (objJSON.startsWith(Constants.RESULT_START_JSON_ARRAY_FLAG)) {
                     return JSON.parseArray(objJSON, clz);
                 } else {
                     List objList = new ArrayList();
@@ -124,7 +132,8 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
                 }
             }
         } else {
-            httpConfig.setErrorNotice(parseCallback.errorNotice(respond));
+            String errorMsg = parseCallback.errorNotice(respond);
+            respond.setErrorData(errorMsg);
         }
         return null;
     }

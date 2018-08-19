@@ -12,12 +12,21 @@ import okio.ForwardingSink;
 import okio.Okio;
 import okio.Sink;
 
+/**
+ * @author linwenhui
+ */
 public class ProgressRequestBody extends RequestBody {
-    //实际的待包装请求体
+    /**
+     * 实际的待包装请求体
+     */
     private final RequestBody requestBody;
-    //进度回调接口
+    /**
+     * 进度回调接口
+     */
     private final IFileUploadCallback fileUploadCallback;
-    //包装完成的BufferedSink
+    /**
+     * 包装完成的BufferedSink
+     */
     private BufferedSink bufferedSink;
 
     /**
@@ -96,9 +105,9 @@ public class ProgressRequestBody extends RequestBody {
                 bytesWritten += byteCount;
                 //回调
                 if (fileUploadCallback != null) {
-                    if (bytesWritten < contentLength)
+                    if (bytesWritten < contentLength) {
                         fileUploadCallback.onProgress((double) bytesWritten / contentLength);
-                    else {
+                    } else {
                         fileUploadCallback.waitServerResponse();
                         fileUploadCallback.completed();
                     }

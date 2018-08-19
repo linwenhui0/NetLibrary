@@ -1,10 +1,11 @@
 package com.hlibrary.net.task;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.hlibrary.net.callback.IFileDownloadCallback;
 import com.hlibrary.net.http.common.file.FileDownloadAccessor;
-import com.hlibrary.net.config.HttpConfig;
+import com.hlibrary.net.model.Respond;
 
 /**
  * 文件下载(以HttpURLConnection方式实现)
@@ -14,7 +15,7 @@ public class FileDownloadAsynHttp extends AsyncTask<String, Integer, Boolean> {
     private final static int DOWNLOAD_CONNECT_TIMEOUT = 15 * 1000;
     private final static int DOWNLOAD_READ_TIMEOUT = 60 * 1000;
 
-    protected HttpConfig httpConfig;
+    protected Context context;
 
     protected FileDownloadAccessor accessor;
     protected IFileDownloadCallback<Boolean> callback;
@@ -22,13 +23,13 @@ public class FileDownloadAsynHttp extends AsyncTask<String, Integer, Boolean> {
     /**
      * 构造函数
      *
-     * @param httpConfig 网络请求参数
-     * @param callback   文件下载监听
+     * @param context  网络请求参数
+     * @param callback 文件下载监听
      */
-    public FileDownloadAsynHttp(HttpConfig httpConfig, IFileDownloadCallback<Boolean> callback) {
-        this.httpConfig = httpConfig;
+    public FileDownloadAsynHttp(Context context, IFileDownloadCallback<Boolean> callback) {
+        this.context = context;
         this.callback = callback;
-        this.accessor = new FileDownloadAccessor(httpConfig.getContext());
+        this.accessor = new FileDownloadAccessor(context);
     }
 
     /**
@@ -45,20 +46,23 @@ public class FileDownloadAsynHttp extends AsyncTask<String, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(String... params) {
-        if (params != null && params.length > 1)
+        if (params != null && params.length > 1) {
             return doGetSaveFile(params[0], params[1]);
+        }
         return false;
     }
 
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-        if (callback == null)
+        if (callback == null) {
             return;
-        if (result)
+        }
+        if (result) {
             callback.onSuccee(true);
-        else
-            callback.onError(httpConfig.getErrorNotice());
+        } else {
+            callback.onError(Respond.NET_ERROR);
+        }
     }
 
 

@@ -2,19 +2,23 @@ package com.hlibrary.net.http.common;
 
 import android.content.Context;
 
-import com.hlibrary.net.model.HttpMethod;
-import com.hlibrary.net.model.Request;
 import com.hlibrary.net.model.Respond;
+import com.hlibrary.net.util.Constants;
 import com.hlibrary.net.util.CookieManage;
+import com.hlibrary.net.util.RequestUtils;
 import com.hlibrary.util.Logger;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
-import static com.hlibrary.net.task.BaseAsynHttp.debug;
+import static com.hlibrary.net.util.Constants.debug;
 
+/**
+ * @author linwenhui
+ */
 public class SimpleHttpAccessor extends BaseHttpAccessor {
 
     private final static String TAG = "SimpleHttpAccessor";
@@ -29,16 +33,15 @@ public class SimpleHttpAccessor extends BaseHttpAccessor {
     }
 
     @Override
-    public Respond executeNormalTask(HttpMethod httpMethod, String url,
-                                     Request param, int connectTimeOut, int readTimeOut,
-                                     boolean isSaveCookie) {
-        if (httpMethod == HttpMethod.GET)
+    public Respond executeRequest(int httpMethod, String url, Map<String, String> param, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
+        if (httpMethod == Constants.GET) {
             return doGet(url, param, connectTimeOut * 1000, readTimeOut * 1000, isSaveCookie);
+        }
         return doPost(url, param, connectTimeOut * 1000, readTimeOut * 1000, isSaveCookie);
     }
 
 
-    public Respond doPost(String urlAddress, Request param,
+    public Respond doPost(String urlAddress, Map<String, String> param,
                           int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
         Respond respond = null;
         try {
@@ -53,17 +56,17 @@ public class SimpleHttpAccessor extends BaseHttpAccessor {
             urlConnection.setInstanceFollowRedirects(false);
             urlConnection.setRequestProperty("Connection", "Keep-Alive");
             urlConnection.setRequestProperty("Charset", "UTF-8");
-            urlConnection
-                    .setRequestProperty("Accept-Encoding", "gzip, deflate");
+            urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
             CookieManage cookieMange = CookieManage.getInstance(mCtx);
-            String SessionId = cookieMange.getSession(urlAddress);
-            if (SessionId != null)
-                urlConnection.setRequestProperty("cookie", SessionId);
+            String sessionId = cookieMange.getSession(urlAddress);
+            if (sessionId != null) {
+                urlConnection.setRequestProperty("cookie", sessionId);
+            }
             urlConnection.connect();
-
-            DataOutputStream out = new DataOutputStream(
-                    urlConnection.getOutputStream());
-            out.write(param.encodeUrl().getBytes());
+            DataOutputStream out = new DataOutputStream(urlConnection.getOutputStream());
+            if (param != null) {
+                out.write(RequestUtils.encodeUrl(param).getBytes());
+            }
             out.flush();
             out.close();
             respond = handleResponse(urlConnection, isSaveCookie);
@@ -77,15 +80,17 @@ public class SimpleHttpAccessor extends BaseHttpAccessor {
     }
 
 
-    public Respond doGet(String urlStr, Request param, int connectTimeOut,
+    public Respond doGet(String urlStr, Map<String, String> param, int connectTimeOut,
                          int readTimeOut, boolean isSaveCookie) {
         Respond respond = null;
         try {
             StringBuilder urlBuilder = new StringBuilder(urlStr);
-            if (param != null)
-                urlBuilder.append("?").append(param.encodeUrl());
-            if (debug)
+            if (param != null) {
+                urlBuilder.append("?").append(RequestUtils.encodeUrl(param));
+            }
+            if (debug) {
                 Logger.getInstance().i(TAG, urlBuilder.toString());
+            }
             URL url = new URL(urlBuilder.toString());
             HttpURLConnection urlConnection = (HttpURLConnection) url
                     .openConnection();
@@ -98,9 +103,10 @@ public class SimpleHttpAccessor extends BaseHttpAccessor {
             urlConnection
                     .setRequestProperty("Accept-Encoding", "gzip, deflate");
             CookieManage cookieMange = CookieManage.getInstance(mCtx);
-            String SessionId = cookieMange.getSession(urlStr);
-            if (SessionId != null)
-                urlConnection.setRequestProperty("cookie", SessionId);
+            String sessionId = cookieMange.getSession(urlStr);
+            if (sessionId != null) {
+                urlConnection.setRequestProperty("cookie", sessionId);
+            }
             urlConnection.connect();
             respond = handleResponse(urlConnection, isSaveCookie);
         } catch (IOException e) {

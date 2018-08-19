@@ -6,15 +6,13 @@ import com.hlibrary.net.callback.IFileUploadCallback;
 import com.hlibrary.net.callback.IResultErrorCallback;
 import com.hlibrary.net.http.okhttp.body.ProgressRequestBody;
 import com.hlibrary.net.listener.IHttpAccessor;
-import com.hlibrary.net.model.FileRequest;
-import com.hlibrary.net.model.HttpMethod;
-import com.hlibrary.net.model.Request;
 import com.hlibrary.net.model.Respond;
+import com.hlibrary.net.util.Constants;
+import com.hlibrary.net.util.RequestUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +24,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * @param <T>
+ * @author linwenhui
+ */
 public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAccessor {
 
     private Context context;
@@ -41,8 +43,8 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
     }
 
     @Override
-    public Respond executeNormalTask(HttpMethod httpMethod, String url, Request params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
-        if (httpMethod == HttpMethod.GET) {
+    public Respond executeRequest(int httpMethod, String url, Map<String, String> params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
+        if (httpMethod == Constants.GET) {
             return doGet(url, params, connectTimeOut, readTimeOut, isSaveCookie);
         }
         return doPost(url, params, connectTimeOut, readTimeOut, isSaveCookie);
@@ -60,10 +62,11 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
         return client;
     }
 
-    private Respond doGet(String url, Request params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
+    private Respond doGet(String url, Map<String, String> params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
         StringBuilder urlBuilder = new StringBuilder(url);
-        if (params != null)
-            urlBuilder.append("?").append(params.encodeUrl());
+        if (params != null) {
+            urlBuilder.append("?").append(RequestUtils.encodeUrl(params));
+        }
         Respond respond;
         OkHttpClient client = buildClient(connectTimeOut, readTimeOut, isSaveCookie);
 
@@ -86,29 +89,33 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
         return respond;
     }
 
-    private Respond doPost(String url, Request params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
+    private Respond doPost(String url, Map<String, String> params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
         RequestBody requestBody;
         okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder().url(url);
-        if (params.getFileRequests().isEmpty()) {
+        if (!params.containsKey(Constants.REQUEST_PARAM_FILE_NAME)) {
             FormBody.Builder builder = new FormBody.Builder();
-            for (Map.Entry<String, String> entry : params.getParams().entrySet()) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
                 builder.add(entry.getKey(), entry.getValue());
             }
             requestBody = builder.build();
         } else {
             MultipartBody.Builder builder = new MultipartBody.Builder();
-            List<FileRequest> fileRequests = params.getFileRequests();
-            final int filesCount = fileRequests.size();
             File updateFile;
-            FileRequest fileRequest;
-            for (Map.Entry<String, String> entry : params.getParams().entrySet()) {
+            String fileKey = params.remove(Constants.REQUEST_PARAM_FILE_KEY);
+            String fileName = params.remove(Constants.REQUEST_PARAM_FILE_NAME);
+            String fileType = params.remove(Constants.REQUEST_PARAM_FILE_TYPE);
+            for (Map.Entry<String, String> entry : params.entrySet()) {
                 builder.addFormDataPart(entry.getKey(), entry.getValue());
             }
+
+            String[] fileKeys = fileKey.split(Constants.REQUEST_PARAM_FILE_SEPARATE);
+            String[] fileNames = fileName.split(Constants.REQUEST_PARAM_FILE_SEPARATE);
+            String[] fileTypes = fileType.split(Constants.REQUEST_PARAM_FILE_SEPARATE);
+            final int filesCount = fileNames.length;
             for (int i = 0; i < filesCount; i++) {
-                fileRequest = params.getFileRequest(i);
-                updateFile = new File(fileRequest.getValue());
-                builder.addFormDataPart("image", updateFile.getName(),
-                        RequestBody.create(MediaType.parse(fileRequest.getFileType()), updateFile));
+                updateFile = new File(fileNames[i]);
+                builder.addFormDataPart(fileKeys[i], updateFile.getName(),
+                        RequestBody.create(MediaType.parse(fileTypes[i]), updateFile));
             }
             IFileUploadCallback fCallback = null;
             if (callback instanceof IFileUploadCallback) {
@@ -139,8 +146,9 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
     @Override
     public void abort() {
         if (call != null) {
-            if (!call.isCanceled())
+            if (!call.isCanceled()) {
                 call.cancel();
+            }
             call = null;
         }
     }

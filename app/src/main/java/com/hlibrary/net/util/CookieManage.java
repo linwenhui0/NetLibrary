@@ -11,6 +11,12 @@ import java.util.List;
 
 import okhttp3.Cookie;
 
+/**
+ * CookieManage
+ *
+ * @author linwh
+ * @date 2018/08/17
+ */
 public class CookieManage {
 
     private final static String SESSION_NAME = "session_name";
@@ -23,11 +29,13 @@ public class CookieManage {
     }
 
     public static CookieManage getInstance(Context mContext) {
-        if (instance == null)
+        if (instance == null) {
             synchronized (CookieManage.class) {
-                if (instance == null)
+                if (instance == null) {
                     instance = new CookieManage(mContext);
+                }
             }
+        }
         return instance;
     }
 
@@ -46,11 +54,11 @@ public class CookieManage {
      * @函数名称：saveCookie
      * @功能描述：保存Cookie
      * @返回类型：boolean
-     * @返回数据
+     * @返回数据:
      */
     public synchronized boolean saveCookie(HttpURLConnection conn) {
-        if (conn.getHeaderField("set-cookie") != null) {
-            String session = conn.getHeaderField("set-cookie");
+        if (conn.getHeaderField(Constants.COOKIE) != null) {
+            String session = conn.getHeaderField(Constants.COOKIE);
             saveSessionTo(conn.getURL().toString(), session);
             return true;
         }

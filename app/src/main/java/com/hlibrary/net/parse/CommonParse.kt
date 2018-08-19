@@ -1,14 +1,17 @@
 package com.hlibrary.net.parse
 
+import android.app.Application
 import android.content.Context
 import android.text.TextUtils
 import com.hlibrary.net.callback.IParseCallback
+import com.hlibrary.net.callback.IParseConfig
 import com.hlibrary.net.model.Respond
-import com.hlibrary.net.task.BaseAsynHttp.debug
+import com.hlibrary.net.util.Constants
+import com.hlibrary.net.util.Constants.debug
 import com.hlibrary.util.Logger
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 class CommonParse : IParseCallback {
 
@@ -21,6 +24,7 @@ class CommonParse : IParseCallback {
 
     companion object {
         private var instance: CommonParse? = null
+        @JvmStatic
         fun getInstance(context: Context): CommonParse {
             if (instance == null) {
                 synchronized(CommonParse::class) {
@@ -38,57 +42,66 @@ class CommonParse : IParseCallback {
     }
 
     private fun initCode() {
-        var BuildConfigName = context?.packageName + ".BuildConfig"
-        try {
-            var cls = Class.forName(BuildConfigName)
-            var field: Field? = null
-            field = cls.getField("KEY_NET_JSON_RETURN_CODE")
-            keyCode = field.get(null) as String
+        var application: Application = context as Application
+        if (application is IParseConfig) {
+            keyCode = application.getNetResponseCodeKey()
+            keyCodeSuc = application.getNetResponseCodeSuc()
+        } else {
+            try {
+                var cls = application.javaClass
+                var method: Method = cls.getDeclaredMethod(Constants.NET_RESPONSE_CODE_KEY)
+                keyCode = method.invoke(application) as String
+                method = cls.getDeclaredMethod(Constants.NET_RESPONSE_CODE_SUC)
+                keyCodeSuc = method.invoke(application) as String
 
-            field = cls.getField("KEY_NET_JSON_SUC_RETURN_CODE")
-            keyCodeSuc = field.get(null) as String
-
-        } catch (e: Exception) {
-            e.printStackTrace()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     private fun initErrorMsg() {
-        var BuildConfigName = context?.packageName + ".BuildConfig"
-        try {
-            var cls = Class.forName(BuildConfigName)
-            var field: Field? = null
-
-            field = cls.getField("KEY_NET_JSON_REUTRN_ERROR_MSG")
-            keyErrorMsg = field.get(null) as String
-        } catch (e: Exception) {
-            e.printStackTrace()
+        var application: Application = context as Application
+        if (application is IParseConfig) {
+            keyErrorMsg = application.getNetResponseErrorMsgKey()
+        } else {
+            try {
+                var cls = application.javaClass
+                var method: Method = cls.getDeclaredMethod(Constants.NET_RESPONSE_ERROR_MSG)
+                keyErrorMsg = method.invoke(application) as String
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     private fun initData() {
-        var BuildConfigName = context?.packageName + ".BuildConfig"
-        try {
-            var cls = Class.forName(BuildConfigName)
-            var field: Field? = null
-
-            field = cls.getField("KEY_NET_JSON_DATA")
-            keyData = field.get(null) as String
-        } catch (e: Exception) {
-            e.printStackTrace()
+        var application: Application = context as Application
+        if (application is IParseConfig) {
+            keyData = application.getNetResponseData()
+        } else {
+            try {
+                var cls = application.javaClass
+                var method: Method = cls.getDeclaredMethod(Constants.NET_RESPONSE_DATA)
+                keyData = method.invoke(application) as String
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     private fun initArrayData() {
-        var BuildConfigName = context?.packageName + ".BuildConfig"
-        try {
-            var cls = Class.forName(BuildConfigName)
-            var field: Field? = null
-
-            field = cls.getField("KEY_NET_JSON_ARRAY_DATA")
-            keyArrayData = field.get(null) as String
-        } catch (e: Exception) {
-            e.printStackTrace()
+        var application: Application = context as Application
+        if (application is IParseConfig) {
+            keyArrayData = application.getNetResponseArrayData()
+        } else {
+            try {
+                var cls = application.javaClass
+                var method: Method = cls.getDeclaredMethod(Constants.NET_RESPONSE_ARRAY_DATA)
+                keyArrayData = method.invoke(application) as String
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -103,7 +116,7 @@ class CommonParse : IParseCallback {
                     initCode()
                 var codeJSON: JSONObject? = null
                 var code = ""
-                keyCode?.split("|")?.forEach {
+                keyCode?.split(Constants.NET_RESPONSE_SEPARATE)?.forEach {
                     if (codeJSON == null) {
                         codeJSON = dataObj.optJSONObject(it)
                         if (codeJSON == null) {
@@ -142,7 +155,7 @@ class CommonParse : IParseCallback {
         var errorMsgJSON: JSONObject? = null
         try {
             var dataObj = JSONObject(respond?.getData())
-            keyErrorMsg?.split("|")?.forEach {
+            keyErrorMsg?.split(Constants.NET_RESPONSE_SEPARATE)?.forEach {
                 if (errorMsgJSON == null) {
                     errorMsgJSON = dataObj.optJSONObject(it)
                     if (errorMsgJSON == null) {
@@ -175,15 +188,16 @@ class CommonParse : IParseCallback {
             if (debug)
                 Logger.getInstance().defaultTagD(dataObj?.toString())
             var objJson: JSONObject? = null
-            keyData?.split("|")?.forEach {
+            keyData?.split(Constants.NET_RESPONSE_SEPARATE)?.forEach {
                 if (objJson == null) {
                     objJson = dataObj.optJSONObject(it)
                     if (objJson == null)
                         return dataObj.optString(it, "{}")
                 } else {
                     var tempObj = objJson?.optJSONObject(it)
-                    if (tempObj == null)
+                    if (tempObj == null) {
                         return objJson?.optString(it, "{}")!!
+                    }
                     objJson = tempObj
                 }
             }
@@ -204,7 +218,7 @@ class CommonParse : IParseCallback {
         try {
             var dataObj = JSONObject(respond?.getData())
             var objJson: JSONObject? = null
-            keyArrayData?.split("|")?.forEach {
+            keyArrayData?.split(Constants.NET_RESPONSE_SEPARATE)?.forEach {
                 if (objJson == null) {
                     objJson = dataObj.optJSONObject(it)
                     if (objJson == null)

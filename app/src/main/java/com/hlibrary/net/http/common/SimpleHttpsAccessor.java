@@ -4,16 +4,17 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.hlibrary.net.listener.IHttpAccessor;
-import com.hlibrary.net.model.HttpMethod;
-import com.hlibrary.net.model.Request;
 import com.hlibrary.net.model.Respond;
+import com.hlibrary.net.util.Constants;
 import com.hlibrary.net.util.CookieManage;
+import com.hlibrary.net.util.RequestUtils;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -32,26 +33,31 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
 
     public class NullHostNameVerifier implements HostnameVerifier {
 
+        @Override
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }
     }
 
     private TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+
+        @Override
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
             return null;
         }
 
+        @Override
         public void checkClientTrusted(
                 java.security.cert.X509Certificate[] certs, String authType) {
         }
 
+        @Override
         public void checkServerTrusted(
                 java.security.cert.X509Certificate[] certs, String authType) {
         }
     }};
 
-    public SimpleHttpsAccessor(Context mCtx, boolean debug) {
+    public SimpleHttpsAccessor(Context mCtx) {
 
         super(mCtx);
         // allow Android to use an untrusted certificate for SSL/HTTPS
@@ -59,7 +65,7 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
         // so that when you debug app, you can use Fiddler http://fiddler2.com
         // to logs all HTTPS traffic
         try {
-            if (debug) {
+            if (Constants.debug) {
                 HttpsURLConnection
                         .setDefaultHostnameVerifier(new NullHostNameVerifier());
                 SSLContext sc = SSLContext.getInstance("SSL");
@@ -73,12 +79,11 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
     }
 
     @Override
-    public Respond executeNormalTask(HttpMethod httpMethod, String url,
-                                     Request param, int connectTimeOut, int readTimeOut,
-                                     boolean isSaveCookie) {
-        if (httpMethod == HttpMethod.GET)
-            return doGet(url, param, connectTimeOut, readTimeOut, isSaveCookie);
-        return doPost(url, param, connectTimeOut, readTimeOut, isSaveCookie);
+    public Respond executeRequest(int httpMethod, String url, Map<String, String> params, int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
+        if (httpMethod == Constants.GET) {
+            return doGet(url, params, connectTimeOut, readTimeOut, isSaveCookie);
+        }
+        return doPost(url, params, connectTimeOut, readTimeOut, isSaveCookie);
     }
 
     private static Proxy getProxy() {
@@ -92,13 +97,7 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
         }
     }
 
-    public Respond doPost(String urlAddress, Request param,
-                          boolean isSaveCookie) {
-        return doPost(urlAddress, param, CONNECT_TIMEOUT, READ_TIMEOUT,
-                isSaveCookie);
-    }
-
-    public Respond doPost(String urlAddress, Request param,
+    public Respond doPost(String urlAddress, Map<String, String> param,
                           int connectTimeOut, int readTimeOut, boolean isSaveCookie) {
         Respond respond = null;
         try {
@@ -121,14 +120,17 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
             urlConnection.setRequestProperty("Charset", "UTF-8");
             urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
             CookieManage cookieMange = CookieManage.getInstance(mCtx);
-            String SessionId = cookieMange.getSession(urlAddress);
-            if (SessionId != null)
-                urlConnection.setRequestProperty("cookie", SessionId);
+            String sessionId = cookieMange.getSession(urlAddress);
+            if (sessionId != null) {
+                urlConnection.setRequestProperty("cookie", sessionId);
+            }
             urlConnection.connect();
 
             DataOutputStream out = new DataOutputStream(
                     urlConnection.getOutputStream());
-            out.write(param.encodeUrl().getBytes());
+            if (param != null && !param.isEmpty()) {
+                out.write(RequestUtils.encodeUrl(param).getBytes());
+            }
             out.flush();
             out.close();
             respond = handleResponse(urlConnection, isSaveCookie);
@@ -141,16 +143,15 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
         return respond;
     }
 
-    public Respond doGet(String urlStr, Request param, boolean isSaveCookie) {
-        return doGet(urlStr, param, CONNECT_TIMEOUT, READ_TIMEOUT, isSaveCookie);
-    }
 
-    public Respond doGet(String urlStr, Request param, int connectTimeOut,
+    public Respond doGet(String urlStr, Map<String, String> param, int connectTimeOut,
                          int readTimeOut, boolean isSaveCookie) {
         Respond respond = null;
         try {
             StringBuilder urlBuilder = new StringBuilder(urlStr);
-            urlBuilder.append("?").append(param.encodeUrl());
+            if (param != null && !param.isEmpty()) {
+                urlBuilder.append("?").append(RequestUtils.encodeUrl(param));
+            }
             URL url = new URL(urlBuilder.toString());
             Proxy proxy = getProxy();
             if (proxy != null) {
@@ -167,9 +168,10 @@ public class SimpleHttpsAccessor extends BaseHttpAccessor<HttpsURLConnection> im
             urlConnection.setRequestProperty("Charset", "UTF-8");
             urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
             CookieManage cookieMange = CookieManage.getInstance(mCtx);
-            String SessionId = cookieMange.getSession(urlStr);
-            if (SessionId != null)
-                urlConnection.setRequestProperty("cookie", SessionId);
+            String sessionId = cookieMange.getSession(urlStr);
+            if (sessionId != null) {
+                urlConnection.setRequestProperty("cookie", sessionId);
+            }
             urlConnection.connect();
             respond = handleResponse(urlConnection, isSaveCookie);
         } catch (IOException e) {

@@ -12,6 +12,9 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
+/**
+ * @author linwenhui
+ */
 public class OKHttpCookie implements CookieJar {
 
     private CookieManage cookieManage;
@@ -28,8 +31,9 @@ public class OKHttpCookie implements CookieJar {
     @Override
     public List<Cookie> loadForRequest(HttpUrl url) {
         String cookieJson = cookieManage.getSession(url.toString());
-        if (TextUtils.isEmpty(cookieJson))
+        if (TextUtils.isEmpty(cookieJson)) {
             return null;
+        }
         return JSON.parseArray(cookieJson, Cookie.class);
     }
 }

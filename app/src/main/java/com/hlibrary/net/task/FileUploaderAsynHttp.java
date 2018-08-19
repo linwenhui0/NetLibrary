@@ -1,10 +1,13 @@
 package com.hlibrary.net.task;
 
 
+import android.content.Context;
+
 import com.hlibrary.net.callback.IFileUploadCallback;
 import com.hlibrary.net.http.common.file.FileUploadAccessor;
-import com.hlibrary.net.config.HttpConfig;
-import com.hlibrary.net.listener.IHttpAccessor;
+import com.hlibrary.net.util.Constants;
+
+import java.util.Map;
 
 
 /**
@@ -16,20 +19,12 @@ public class FileUploaderAsynHttp extends NormalAsynHttp<String, IFileUploadCall
     /**
      * 构造函数
      *
-     * @param httpConfig 网络请求参数
+     * @param params 网络请求参数
      */
-    public FileUploaderAsynHttp(HttpConfig httpConfig) {
-        super(httpConfig, new FileUploadAccessor(httpConfig.getContext()), String.class);
+    public FileUploaderAsynHttp(Context context, Map<String, String> params) {
+        super(context, Constants.POST, params, false, String.class);
+        this.accessor = new FileUploadAccessor(context);
     }
 
-    /**
-     * 构造函数
-     *
-     * @param httpConfig 网络请求参数
-     * @param accessor   上传文件实现类
-     */
-    public FileUploaderAsynHttp(HttpConfig httpConfig, IHttpAccessor accessor) {
-        super(httpConfig, accessor, String.class);
-    }
 
 }

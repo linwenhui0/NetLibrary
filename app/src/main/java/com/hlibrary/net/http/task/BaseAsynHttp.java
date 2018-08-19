@@ -1,4 +1,4 @@
-package com.hlibrary.net.task;
+package com.hlibrary.net.http.task;
 
 
 import android.app.Application;
@@ -96,6 +96,9 @@ public abstract class BaseAsynHttp<T extends IResultErrorCallback> {
         }
         if (this.accessor == null) {
             this.accessor = new SimpleHttpAccessor(application);
+        }
+        if (debug) {
+            Logger.getInstance().defaultTagD("accessor == ", accessor.getClass().getSimpleName());
         }
         if (parseCallback == null) {
             if (debug) {

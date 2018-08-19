@@ -6,10 +6,11 @@ import com.hlibrary.net.callback.IFileUploadCallback;
 import com.hlibrary.net.callback.IParseConfig;
 import com.hlibrary.net.http.okhttp.OKHttpAccessor;
 import com.hlibrary.net.listener.IHttpAccessor;
+import com.hlibrary.net.util.Constants;
 
 import org.jetbrains.annotations.NotNull;
 
-public class App extends Application implements IParseConfig{
+public class App extends Application implements IParseConfig {
 
     @NotNull
     @Override
@@ -38,7 +39,7 @@ public class App extends Application implements IParseConfig{
     @NotNull
     @Override
     public String getNetResponseArrayData() {
-        return "data";
+        return "data" + Constants.NET_RESPONSE_SEPARATE + "forecast";
     }
 
     @NotNull

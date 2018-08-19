@@ -9,6 +9,7 @@ import com.hlibrary.net.listener.IHttpAccessor;
 import com.hlibrary.net.model.Respond;
 import com.hlibrary.net.util.Constants;
 import com.hlibrary.net.util.RequestUtils;
+import com.hlibrary.util.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,8 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import static com.hlibrary.net.util.Constants.debug;
 
 /**
  * @param <T>
@@ -66,6 +69,9 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
         StringBuilder urlBuilder = new StringBuilder(url);
         if (params != null) {
             urlBuilder.append("?").append(RequestUtils.encodeUrl(params));
+        }
+        if (debug) {
+            Logger.getInstance().defaultTagD(urlBuilder.toString());
         }
         Respond respond;
         OkHttpClient client = buildClient(connectTimeOut, readTimeOut, isSaveCookie);

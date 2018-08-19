@@ -1,4 +1,4 @@
-package com.hlibrary.net.task;
+package com.hlibrary.net.http.task;
 
 import android.os.AsyncTask;
 
@@ -26,8 +26,8 @@ import static com.hlibrary.net.util.Constants.debug;
 
 class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer, List<T>> {
 
-    private final static int CONNECT_TIMEOUT = 10;
-    private final static int READ_TIMEOUT = 10;
+    private final static int CONNECT_TIMEOUT = 20;
+    private final static int READ_TIMEOUT = 20;
     private int method;
     private Map<String, String> params;
     private IHttpAccessor accessor;
@@ -113,7 +113,12 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
             if (debug) {
                 Logger.getInstance().defaultTagI(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
             }
-            final String objJSON = parseCallback.getObjectString(respond);
+            final String objJSON;
+            if (callback instanceof IMulResultCallback) {
+                objJSON = parseCallback.getArrayString(respond);
+            } else {
+                objJSON = parseCallback.getObjectString(respond);
+            }
             if (clz.getName().equals(String.class.getName())) {
                 List<T> objList = new ArrayList<>();
                 objList.add((T) objJSON);

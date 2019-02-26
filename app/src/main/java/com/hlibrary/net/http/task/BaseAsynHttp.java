@@ -74,23 +74,23 @@ public abstract class BaseAsynHttp<T extends IResultErrorCallback> {
      * @param params     请求参数
      * @param saveCookie 是否保存cookie
      */
-    public BaseAsynHttp(Context context, int method, Map<String, String> params, boolean saveCookie) {
+    public BaseAsynHttp(Context context, int method, Map<String, String> params, boolean saveCookie, int type) {
         this.method = method;
         this.params = params;
         this.saveCookie = saveCookie;
 
         if (context.getApplicationContext() instanceof Application) {
-            initParseCallback((Application) context.getApplicationContext());
+            initParseCallback((Application) context.getApplicationContext(), type);
         } else {
             parseCallback = CommonParse.Companion.getInstance(context);
             this.accessor = new SimpleHttpAccessor(context);
         }
     }
 
-    private void initParseCallback(Application application) {
+    private void initParseCallback(Application application, int type) {
         if (application instanceof IParseConfig) {
             IParseConfig parseConfig = (IParseConfig) application;
-            initApplicationParseCallback(parseConfig);
+            initApplicationParseCallback(parseConfig, type);
         } else {
             initDefaultParseCallback(application);
         }
@@ -109,7 +109,7 @@ public abstract class BaseAsynHttp<T extends IResultErrorCallback> {
 
     }
 
-    private void initApplicationParseCallback(IParseConfig parseConfig) {
+    private void initApplicationParseCallback(IParseConfig parseConfig, int type) {
         Class parseCls = parseConfig.getParseClass();
         if (parseCls != null) {
             boolean haveParams = parseConfig.parseHaveParam();
@@ -147,7 +147,7 @@ public abstract class BaseAsynHttp<T extends IResultErrorCallback> {
                 }
             }
         }
-        this.accessor = parseConfig.getHttpAccessor();
+        this.accessor = parseConfig.getHttpAccessor(type);
     }
 
     private void initDefaultParseCallback(Application application) {

@@ -21,8 +21,8 @@ public class FileUploaderAsynHttp extends NormalAsynHttp<String, IFileUploadCall
      *
      * @param params 网络请求参数
      */
-    public FileUploaderAsynHttp(Context context, Map<String, String> params) {
-        super(context, Constants.POST, params, false, String.class);
+    public FileUploaderAsynHttp(Context context, Map<String, String> params, int type) {
+        super(context, Constants.POST, params, false, String.class, type);
         this.accessor = new FileUploadAccessor(context);
     }
 

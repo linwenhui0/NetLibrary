@@ -133,13 +133,15 @@ public abstract class BaseHttpAccessor<T extends HttpURLConnection> implements I
                 is = new GZIPInputStream(is);
             }
 
-            buffer = new BufferedReader(new InputStreamReader(is));
-            StringBuilder strBuilder = new StringBuilder();
-            String line;
-            while ((line = buffer.readLine()) != null) {
-                strBuilder.append(line);
+            if (is != null) {
+                buffer = new BufferedReader(new InputStreamReader(is));
+                StringBuilder strBuilder = new StringBuilder();
+                String line;
+                while ((line = buffer.readLine()) != null) {
+                    strBuilder.append(line);
+                }
+                return strBuilder.toString();
             }
-            return strBuilder.toString();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

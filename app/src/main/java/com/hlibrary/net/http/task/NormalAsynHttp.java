@@ -26,8 +26,8 @@ public class NormalAsynHttp<T, D extends IResultErrorCallback> extends BaseAsynH
      * @param params     请求参数
      * @param saveCookie 是否保存cookie
      */
-    NormalAsynHttp(Context context, int method, Map<String, String> params, boolean saveCookie, Class<T> clz) {
-        super(context, method, params, saveCookie);
+    NormalAsynHttp(Context context, int method, Map<String, String> params, boolean saveCookie, Class<T> clz, int type) {
+        super(context, method, params, saveCookie, type);
         this.clz = clz;
     }
 

@@ -10,7 +10,7 @@ interface IParseConfig {
     /**
      * 网络请求类
      */
-    fun getHttpAccessor(): IHttpAccessor
+    fun getHttpAccessor(type: Int): IHttpAccessor
 
     /**
      * 网络数据解析类class

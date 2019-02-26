@@ -184,7 +184,7 @@ class CommonParse : IParseCallback {
 
 
         try {
-            var dataObj = JSONObject(respond?.getData())
+            val dataObj = JSONObject(respond?.getData())
             if (debug)
                 Logger.getInstance().defaultTagD(dataObj?.toString())
             var objJson: JSONObject? = null

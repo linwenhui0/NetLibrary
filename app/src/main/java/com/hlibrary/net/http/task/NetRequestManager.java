@@ -30,19 +30,19 @@ public class NetRequestManager {
         return instance;
     }
 
-    public <T, D extends IResultErrorCallback> NormalAsynHttp<T, D> executeRequest(String url, Map<String, String> params,
+    public <T, D extends IResultErrorCallback> NormalAsynHttp<T, D> executeRequest(int type, String url, Map<String, String> params,
                                                                                    Class<T> cls, D callback) {
-        return executeRequest(Constants.GET, url, params, false, cls, callback);
+        return executeRequest(type, Constants.GET, url, params, false, cls, callback);
     }
 
-    public <T, D extends IResultErrorCallback> NormalAsynHttp<T, D> executeRequest(int httpMethod, String url, Map<String, String> params,
+    public <T, D extends IResultErrorCallback> NormalAsynHttp<T, D> executeRequest(int type, int httpMethod, String url, Map<String, String> params,
                                                                                    Class<T> cls, D callback) {
-        return executeRequest(httpMethod, url, params, false, cls, callback);
+        return executeRequest(type, httpMethod, url, params, false, cls, callback);
     }
 
-    public <T, D extends IResultErrorCallback> NormalAsynHttp<T, D> executeRequest(int httpMethod, String url, Map<String, String> params,
+    public <T, D extends IResultErrorCallback> NormalAsynHttp<T, D> executeRequest(int type, int httpMethod, String url, Map<String, String> params,
                                                                                    boolean isSaveCookie, Class<T> cls, D callback) {
-        NormalAsynHttp<T, D> normalAsynHttp = new NormalAsynHttp<>(context, httpMethod, params, isSaveCookie, cls);
+        NormalAsynHttp<T, D> normalAsynHttp = new NormalAsynHttp<>(context, httpMethod, params, isSaveCookie, cls, type);
         normalAsynHttp.callback = callback;
         normalAsynHttp.doPost(url);
         return normalAsynHttp;

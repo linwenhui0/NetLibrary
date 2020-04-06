@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.hlibrary.net.util.Constants.debug;
-
 
 /**
  * Created by linwenhui on 2018/3/19.
@@ -110,9 +108,8 @@ class Task<T, D extends IResultErrorCallback> extends AsyncTask<String, Integer,
      */
     List<T> parse(Respond respond) {
         if (parseCallback.isValidRespond(respond)) {
-            if (debug) {
-                Logger.getInstance().defaultTagI(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
-            }
+            Logger.Companion.getInstance().defaultTagI(" === parse === code = " + respond.getCode() + " = data = " + respond.getData());
+
             final String objJSON;
             if (callback instanceof IMulResultCallback) {
                 objJSON = parseCallback.getArrayString(respond);

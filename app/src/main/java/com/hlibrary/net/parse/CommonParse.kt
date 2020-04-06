@@ -7,7 +7,6 @@ import com.hlibrary.net.callback.IParseCallback
 import com.hlibrary.net.callback.IParseConfig
 import com.hlibrary.net.model.Respond
 import com.hlibrary.net.util.Constants
-import com.hlibrary.net.util.Constants.debug
 import com.hlibrary.util.Logger
 import org.json.JSONException
 import org.json.JSONObject
@@ -38,7 +37,7 @@ class CommonParse : IParseCallback {
     }
 
     private constructor(context: Context) {
-        this.context = context?.applicationContext
+        this.context = context.applicationContext
     }
 
     private fun initCode() {
@@ -107,8 +106,7 @@ class CommonParse : IParseCallback {
 
 
     override fun isValidRespond(respond: Respond?): Boolean {
-        if (debug)
-            Logger.getInstance().defaultTagD(respond)
+        Logger.instance.defaultTagD(respond!!)
         if (respond?.code == Respond.SUCCEE) {
             try {
                 var dataObj = JSONObject(respond.getData())
@@ -184,9 +182,8 @@ class CommonParse : IParseCallback {
 
 
         try {
-            val dataObj = JSONObject(respond?.getData())
-            if (debug)
-                Logger.getInstance().defaultTagD(dataObj?.toString())
+            val dataObj = JSONObject(respond?.data)
+            Logger.instance.defaultTagD(dataObj)
             var objJson: JSONObject? = null
             keyData?.split(Constants.NET_RESPONSE_SEPARATE)?.forEach {
                 if (objJson == null) {

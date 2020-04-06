@@ -61,7 +61,7 @@ public class App extends Application implements IParseConfig {
 
     @NotNull
     @Override
-    public IHttpAccessor getHttpAccessor() {
+    public IHttpAccessor getHttpAccessor(int type) {
         return new OKHttpAccessor<IFileUploadCallback>(this);
     }
 }

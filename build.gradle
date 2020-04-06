@@ -22,16 +22,7 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven { url 'https://maven.google.com' }
         maven {
-            url "http://108.160.143.119:8081/content/repositories/YFWL-Releases"
-        }
-        maven {
-            url "http://108.160.143.119:8081/content/repositories/YFWL-Snapshots"
-        }
-        maven {
-            url "http://108.160.143.119:8081/content/repositories/HLibrary-Releases"
-        }
-        maven {
-            url "http://108.160.143.119:8081/content/repositories/HLibrary-Snapshots"
+            url "http://207.246.93.94:8081/nexus/content/groups/public/"
         }
         maven{
             url 'http://maven.aliyun.com/nexus/content/groups/public/'

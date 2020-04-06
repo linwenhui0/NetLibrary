@@ -20,11 +20,12 @@ android {
 }
 
 dependencies {
-    compileOnly 'com.hlibrary.util:utillibrary:0.0.6'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    compileOnly 'com.hlibrary.util:utillibrary:0.0.12'
+    compileOnly 'com.alibaba:fastjson:1.2.51'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.okio:okio:1.15.0'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 
-apply from: 'http://108.160.143.119/gradle/gradle-mvn-push.gradle'
+apply from: 'http://207.246.93.94/gradle/gradle-mvn-push.gradle'

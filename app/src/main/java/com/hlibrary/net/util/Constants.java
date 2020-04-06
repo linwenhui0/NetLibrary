@@ -5,7 +5,6 @@ package com.hlibrary.net.util;
  */
 public final class Constants {
 
-    public static boolean debug = true;
     public static final String CANCEL = "请求中断";
     public static final String COOKIE = "set-cookie";
 

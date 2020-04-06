@@ -25,7 +25,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static com.hlibrary.net.util.Constants.debug;
 
 /**
  * @param <T>
@@ -70,9 +69,8 @@ public class OKHttpAccessor<T extends IResultErrorCallback> implements IHttpAcce
         if (params != null) {
             urlBuilder.append("?").append(RequestUtils.encodeUrl(params));
         }
-        if (debug) {
-            Logger.getInstance().defaultTagD(urlBuilder.toString());
-        }
+
+        Logger.Companion.getInstance().defaultTagD(urlBuilder.toString());
         Respond respond;
         OkHttpClient client = buildClient(connectTimeOut, readTimeOut, isSaveCookie);
 
